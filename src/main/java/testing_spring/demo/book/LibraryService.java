@@ -1,8 +1,8 @@
 package testing_spring.demo.book;
 
 import java.time.LocalDate;
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +16,16 @@ public class LibraryService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Book> getAllBooks() {
-		return bookRepository.findAll();
+	public Page<BookResponse> getBooks(String keyword, Pageable pageable) {
+		Page<Book> books;
+		if (keyword == null || keyword.isBlank()) {
+			books = bookRepository.findAll(pageable);
+		} else {
+			String value = keyword.trim();
+			books = bookRepository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCaseOrIsbnContainingIgnoreCase(
+					value, value, value, pageable);
+		}
+		return books.map(BookResponse::from);
 	}
 
 	@Transactional(readOnly = true)
@@ -93,19 +101,6 @@ public class LibraryService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Book> searchBooks(String keyword) {
-		if (keyword == null || keyword.isBlank()) {
-			return getAllBooks();
-		}
-
-		String normalizedKeyword = keyword.trim();
-		return bookRepository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCaseOrIsbnContainingIgnoreCase(
-				normalizedKeyword,
-				normalizedKeyword,
-				normalizedKeyword
-		);
-	}
-
 	private Book findBook(Long id) {
 		return bookRepository.findById(id)
 				.orElseThrow(() -> new BookNotFoundException(id));
@@ -124,8 +119,8 @@ public class LibraryService {
 		if (request.isbn() == null || request.isbn().isBlank()) {
 			throw new BookValidationException("ISBN is required");
 		}
-		if (request.publishedYear() == null || request.publishedYear() < 0) {
-			throw new BookValidationException("Published year must be a positive number");
+		if (request.publishedYear() == null) {
+			throw new BookValidationException("Published year is required");
 		}
 	}
 }

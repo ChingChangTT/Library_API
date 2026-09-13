@@ -1,5 +1,7 @@
 package testing_spring.demo;
 
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -7,7 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class HomeController {
 
     @GetMapping("/")
-    public String home() {
-        return "Library API is running. Use /api/books to access the book endpoints.";
+    public Map<String, String> home() {
+        return Map.of(
+                "name", "Library and Skincare API",
+                "status", "running",
+                "documentation", "/docs");
     }
 }
