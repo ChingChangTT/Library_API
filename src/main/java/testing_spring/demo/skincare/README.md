@@ -25,7 +25,7 @@ These are used in `SkincareProduct.java`.
 
 | Keyword or annotation | Meaning |
 | --- |  --- |
-| `@Entity` | Tells JPA/Hibernate that this class represents a database table. By default, the table name is based on the class name. |
+| `@Entity` | Tells JPA/Hibernate that this class represents or maps to a database table. By default, the table name is based on the class name. |
 | `@Id` | Marks `id` as the table's primary key. |
 | `@GeneratedValue` | Tells JPA to generate the primary-key value for a new product. The application does not need to assign the ID manually. |
 | `strategy = GenerationType.IDENTITY` | Uses the database's identity or auto-increment column to generate IDs. |
