@@ -1,36 +1,28 @@
 package testing_spring.demo.book;
 import java.time.LocalDate;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
-@Entity
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+// Keep unavailable loan details out of JSON instead of returning them as null.
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Book {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
 	private String title;
 
-	@Column(nullable = false)
 	private String author;
 
-	@Column(nullable = false, unique = true)
 	private String isbn;
 
-	@Column(nullable = false)
 	private Integer publishedYear;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
 	private BookStatus status;
 
 	private String borrowedBy;
+
+	// Make the API's date format explicit and consistent for clients.
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate borrowedDate;
 
 	public Book() {

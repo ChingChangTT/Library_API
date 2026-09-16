@@ -52,6 +52,29 @@ class ApiIntegrationTests {
     }
 
     @Test
+    void paginationUsesOffsetAndDescendingSort() throws Exception {
+        mvc.perform(get("/api/books").param("page", "1").param("size", "2").param("sort", "title,desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Clean Code"))
+                .andExpect(jsonPath("$.totalElements").value(3));
+    }
+
+    @Test
+    void searchReturnsMatchingPageAndCount() throws Exception {
+        mvc.perform(get("/api/books").param("keyword", " SPRING ").param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].title").value("Spring in Action"))
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void rejectsUnknownSortProperty() throws Exception {
+        mvc.perform(get("/api/books").param("sort", "unknown,asc"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void createsAndBorrowsABook() throws Exception {
         String bookJson = """
                 {"title":"Domain-Driven Design","author":"Eric Evans",
