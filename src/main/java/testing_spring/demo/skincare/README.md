@@ -9,6 +9,9 @@ HTTP request -> Controller -> Service -> Repository -> Database
 
 ## Files
 
+See [the relationship walkthrough](RELATIONSHIPS.md) for the category-to-products
+mapping, migration, and SQL exercise.
+
 | File | Purpose |
 | --- | --- |
 | `SkincareProduct.java` | Defines the skincare product database entity. |
@@ -66,7 +69,7 @@ These are used in `SkincareProductController.java`.
 | --- | --- | --- |
 | `GET` | `/api/skincare-products` | Get every product. |
 | `GET` | `/api/skincare-products/{id}` | Get one product by ID. |
-| `GET` | `/api/skincare-products/search?keyword=value` | Search by name, brand, or category. |
+| `GET` | `/api/skincare-products?keyword=value` | Search by name, brand, or category. |
 | `POST` | `/api/skincare-products` | Create a product from a JSON request body. |
 | `PUT` | `/api/skincare-products/{id}` | Replace a product's editable values. |
 | `DELETE` | `/api/skincare-products/{id}` | Delete a product. |
@@ -133,9 +136,9 @@ repository.deleteById(1L);   // Delete product ID 1
 Spring Data JPA builds this query from the method name:
 
 ```java
-List<SkincareProduct>
-findByNameContainingIgnoreCaseOrBrandContainingIgnoreCaseOrCategoryContainingIgnoreCase(
-        String name, String brand, String category);
+Page<SkincareProduct>
+findByNameContainingIgnoreCaseOrBrandContainingIgnoreCaseOrCategory_NameContainingIgnoreCase(
+        String name, String brand, String category, Pageable pageable);
 ```
 
 The name is interpreted as follows:
@@ -143,7 +146,7 @@ The name is interpreted as follows:
 | Name part | Meaning |
 | --- | --- |
 | `findBy` | Start a database query. |
-| `Name`, `Brand`, `Category` | Entity fields to search. |
+| `Name`, `Brand`, `Category_Name` | Product fields and the related category's name to search. |
 | `Containing` | Match text containing the provided value, similar to SQL `LIKE %value%`. |
 | `IgnoreCase` | Ignore uppercase and lowercase differences. |
 | `Or` | A product matches when any one of the three field conditions is true. |
@@ -151,8 +154,8 @@ The name is interpreted as follows:
 The service passes the same search value into all three parameters:
 
 ```java
-repository.findByNameContainingIgnoreCaseOrBrandContainingIgnoreCaseOrCategoryContainingIgnoreCase(
-        value, value, value);
+repository.findByNameContainingIgnoreCaseOrBrandContainingIgnoreCaseOrCategory_NameContainingIgnoreCase(
+        value, value, value, pageable);
 ```
 
 Searching for `cream` therefore matches a product when `cream` appears anywhere
@@ -160,11 +163,12 @@ in its name, brand, or category, even if the capitalization is different. The
 generated query is approximately equivalent to:
 
 ```sql
-SELECT *
-FROM skincare_product
-WHERE LOWER(name) LIKE LOWER('%cream%')
-   OR LOWER(brand) LIKE LOWER('%cream%')
-   OR LOWER(category) LIKE LOWER('%cream%');
+SELECT p.*
+FROM skincare_product p
+JOIN skincare_category c ON c.id = p.category_id
+WHERE LOWER(p.name) LIKE LOWER('%cream%')
+   OR LOWER(p.brand) LIKE LOWER('%cream%')
+   OR LOWER(c.name) LIKE LOWER('%cream%');
 ```
 
 The repository's place in the request flow is:

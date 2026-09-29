@@ -5,6 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SkincareProductRepository extends JpaRepository<SkincareProduct, Long> {
-    Page<SkincareProduct> findByNameContainingIgnoreCaseOrBrandContainingIgnoreCaseOrCategoryContainingIgnoreCase(
+    Page<SkincareProduct> findByNameContainingIgnoreCaseOrBrandContainingIgnoreCaseOrCategory_NameContainingIgnoreCase(
             String name, String brand, String category, Pageable pageable);
 }

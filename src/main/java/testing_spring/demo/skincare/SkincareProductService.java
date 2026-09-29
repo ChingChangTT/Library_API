@@ -10,9 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class SkincareProductService {
     private final SkincareProductRepository repository;
+    private final SkincareCategoryRepository categoryRepository;
 
-    public SkincareProductService(SkincareProductRepository repository) {
+    public SkincareProductService(SkincareProductRepository repository, SkincareCategoryRepository categoryRepository) {
         this.repository = repository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -26,7 +28,7 @@ public class SkincareProductService {
             return repository.findAll(pageable).map(SkincareProductResponse::from);
         }
         String value = keyword.trim();
-        return repository.findByNameContainingIgnoreCaseOrBrandContainingIgnoreCaseOrCategoryContainingIgnoreCase(
+        return repository.findByNameContainingIgnoreCaseOrBrandContainingIgnoreCaseOrCategory_NameContainingIgnoreCase(
                 value, value, value, pageable).map(SkincareProductResponse::from);
     }
 
@@ -35,7 +37,7 @@ public class SkincareProductService {
         return repository.save(new SkincareProduct(
                 request.name().trim(),
                 request.brand().trim(),
-                request.category().trim(),
+                resolveCategory(request.category()),
                 request.price(),
                 request.stock()));
     }
@@ -45,7 +47,7 @@ public class SkincareProductService {
         SkincareProduct product = findProduct(id);
         product.setName(request.name().trim());
         product.setBrand(request.brand().trim());
-        product.setCategory(request.category().trim());
+        product.setCategory(resolveCategory(request.category()));
         product.setPrice(request.price());
         product.setStock(request.stock());
         return repository.save(product);
@@ -56,6 +58,13 @@ public class SkincareProductService {
             throw new SkincareProductNotFoundException(id);
         }
         repository.deleteById(id);
+    }
+
+    private SkincareCategory resolveCategory(String name) {
+        // Reuse one category row for products with the same trimmed category name.
+        String value = name.trim();
+        return categoryRepository.findByName(value)
+                .orElseGet(() -> categoryRepository.save(new SkincareCategory(value)));
     }
 
     private SkincareProduct findProduct(Long id) {

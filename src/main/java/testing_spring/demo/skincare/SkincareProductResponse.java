@@ -12,6 +12,6 @@ public record SkincareProductResponse(
 ) {
     public static SkincareProductResponse from(SkincareProduct product) {
         return new SkincareProductResponse(product.getId(), product.getName(), product.getBrand(),
-                product.getCategory(), product.getPrice(), product.getStock());
+                product.getCategory().getName(), product.getPrice(), product.getStock());
     }
 }
