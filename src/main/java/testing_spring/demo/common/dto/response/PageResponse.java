@@ -1,4 +1,4 @@
-package testing_spring.demo.common;
+package testing_spring.demo.common.dto.response;
 
 import java.util.List;
 

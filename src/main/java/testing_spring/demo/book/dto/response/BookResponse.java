@@ -1,5 +1,7 @@
-package testing_spring.demo.book;
+package testing_spring.demo.book.dto.response;
 
+import testing_spring.demo.book.BookStatus;
+import testing_spring.demo.book.Book;
 import java.time.LocalDate;
 
 public record BookResponse(

@@ -1,4 +1,4 @@
-package testing_spring.demo.book;
+package testing_spring.demo.book.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

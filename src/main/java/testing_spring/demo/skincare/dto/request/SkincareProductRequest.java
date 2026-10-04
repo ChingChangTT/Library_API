@@ -1,4 +1,4 @@
-package testing_spring.demo.skincare;
+package testing_spring.demo.skincare.dto.request;
 
 import java.math.BigDecimal;
 

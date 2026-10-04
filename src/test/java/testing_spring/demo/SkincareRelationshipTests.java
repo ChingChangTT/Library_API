@@ -1,5 +1,7 @@
 package testing_spring.demo;
 
+import testing_spring.demo.skincare.dto.response.SkincareProductResponse;
+import testing_spring.demo.skincare.dto.request.SkincareProductRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.math.BigDecimal;

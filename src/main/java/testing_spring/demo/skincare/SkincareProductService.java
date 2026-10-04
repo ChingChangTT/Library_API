@@ -1,5 +1,7 @@
 package testing_spring.demo.skincare;
 
+import testing_spring.demo.skincare.dto.response.SkincareProductResponse;
+import testing_spring.demo.skincare.dto.request.SkincareProductRequest;
 import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

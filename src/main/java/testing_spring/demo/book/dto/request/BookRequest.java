@@ -1,4 +1,4 @@
-package testing_spring.demo.book;
+package testing_spring.demo.book.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

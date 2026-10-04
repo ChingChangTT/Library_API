@@ -1,10 +1,12 @@
 package testing_spring.demo.skincare;
 
+import testing_spring.demo.common.dto.response.PageResponse;
+import testing_spring.demo.skincare.dto.response.SkincareProductResponse;
+import testing_spring.demo.skincare.dto.request.SkincareProductRequest;
 import java.net.URI;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import testing_spring.demo.common.PageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

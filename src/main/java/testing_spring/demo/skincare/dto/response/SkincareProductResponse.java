@@ -1,5 +1,6 @@
-package testing_spring.demo.skincare;
+package testing_spring.demo.skincare.dto.response;
 
+import testing_spring.demo.skincare.SkincareProduct;
 import java.math.BigDecimal;
 
 public record SkincareProductResponse(

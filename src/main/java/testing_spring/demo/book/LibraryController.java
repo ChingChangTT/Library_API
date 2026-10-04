@@ -1,10 +1,13 @@
 package testing_spring.demo.book;
 
+import testing_spring.demo.common.dto.response.PageResponse;
+import testing_spring.demo.book.dto.response.BookResponse;
+import testing_spring.demo.book.dto.request.BorrowBookRequest;
+import testing_spring.demo.book.dto.request.BookRequest;
 import java.net.URI;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import testing_spring.demo.common.PageResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

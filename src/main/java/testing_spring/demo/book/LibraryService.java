@@ -1,5 +1,8 @@
 package testing_spring.demo.book;
 
+import testing_spring.demo.book.dto.response.BookResponse;
+import testing_spring.demo.book.dto.request.BorrowBookRequest;
+import testing_spring.demo.book.dto.request.BookRequest;
 import java.time.LocalDate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
