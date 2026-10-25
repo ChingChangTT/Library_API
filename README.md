@@ -4,6 +4,94 @@ A Spring Boot 4 REST API demonstrating a production-style controller/service/rep
 architecture, request validation, pagination, database migrations, consistent errors,
 and integration testing.
 
+## Architecture
+
+Every request flows through the same layers. Errors thrown anywhere are turned into
+a consistent JSON response by `GlobalExceptionHandler`.
+
+```mermaid
+flowchart LR
+    Client["Client (Postman / browser)"] -->|"HTTP JSON"| C["Controller"]
+    C -->|"Request DTO"| S["Service"]
+    S --> R["Repository"]
+    R -->|"SQL"| DB[("Database")]
+    S -.->|"throws exception"| G["GlobalExceptionHandler"]
+    G -.->|"ApiError JSON"| Client
+    C -->|"Response DTO"| Client
+```
+
+| Layer | Example | Responsibility |
+| --- | --- | --- |
+| Controller | `LibraryController` | Receives HTTP requests, reads path/query/body, returns the response. No business logic. |
+| Service | `LibraryService` | Business rules (unique ISBN, cannot borrow a borrowed book) inside a `@Transactional` boundary. |
+| Repository | `BookRepository` | Database access only (`JdbcTemplate` for books, `JpaRepository` for skincare). |
+| Entity | `Book` | Java representation of a database row. |
+| DTO | `BookRequest`, `BookResponse` | Shape of the JSON going in and out, separate from the entity. |
+| Exceptions | `BookNotFoundException`, `BookUnavailableException` | Named domain errors mapped to HTTP status codes (404 / 400). |
+
+### Package structure
+
+```text
+src/main/java/testing_spring/demo
+├── DemoApplication.java          # Spring Boot entry point
+├── book/                         # Library feature (Spring JDBC)
+│   ├── LibraryController.java
+│   ├── LibraryService.java
+│   ├── BookRepository.java
+│   ├── Book.java, BookStatus.java
+│   ├── *Exception.java
+│   └── dto/request, dto/response
+├── skincare/                     # Skincare feature (Spring Data JPA)
+│   ├── SkincareProductController.java
+│   ├── SkincareProductService.java
+│   ├── SkincareProductRepository.java, SkincareCategoryRepository.java
+│   ├── SkincareProduct.java, SkincareCategory.java
+│   └── dto/request, dto/response
+└── common/                       # Shared code
+    ├── GlobalExceptionHandler.java
+    ├── OpenApiConfig.java
+    └── dto/response (ApiError, ApiMessage, PageResponse)
+
+src/main/resources
+├── application*.properties       # dev (default) / prod profiles
+├── db/migration/                 # Flyway schema migrations
+└── dev/db/migration/             # Dev-only seed data
+```
+
+### How the controller reads a request
+
+Only the controller layer knows about HTTP. Annotations tell Spring which part of
+the request goes into which method parameter:
+
+| Request part | Annotation | Example |
+| --- | --- | --- |
+| Base URL | `@RequestMapping("/api/books")` | Prefix for every endpoint in the class |
+| HTTP method + path | `@GetMapping`, `@PostMapping("/{id}/borrow")` | Chooses which method runs |
+| Path value (`/api/books/5`) | `@PathVariable Long id` | `id = 5` |
+| Query string (`?keyword=spring`) | `@RequestParam String keyword` | `keyword = "spring"` |
+| Paging (`?page=0&size=20&sort=title,asc`) | `Pageable pageable` | Built automatically by Spring |
+| JSON body | `@RequestBody BookRequest request` | JSON converted to a Java record |
+| Body validation | `@Valid` | Runs the constraints declared on the DTO |
+
+Example: `POST /api/books/5/borrow` with body `{ "borrowerName": "Ada" }`
+
+```java
+@PostMapping("/{id}/borrow")                          // matches POST /api/books/{id}/borrow
+public BookResponse borrowBook(
+        @PathVariable Long id,                        // 5, taken from the URL
+        @Valid @RequestBody BorrowBookRequest request // {"borrowerName":"Ada"}, taken from the body
+) {
+    return BookResponse.from(libraryService.borrowBook(id, request));
+}
+```
+
+- **Controller**: reads the URL and body, then passes plain Java values to the service.
+- **DTO** (`BookRequest`): declares validation rules such as `@NotBlank` and the ISBN
+  `@Pattern`. With `@Valid`, Spring checks them before the controller method runs; a
+  failure becomes a `400` response through `GlobalExceptionHandler`.
+- **Service**: never sees HTTP. It receives `id` and `request` and applies business
+  rules, so it can be reused outside the web layer (scheduled jobs, tests).
+
 ## Run locally
 
 Requirements: Java 21. The default `dev` profile uses an in-memory H2 database and
